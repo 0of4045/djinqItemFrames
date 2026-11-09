@@ -11,21 +11,38 @@ public final class DjinqItemFrames extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        saveResourceIfAbsent("messages.yml");
-        reloadSettings();
+        ResourceMigration.mergeMissingDefaults(this, "config.yml");
+        ResourceMigration.mergeMissingDefaults(this, "messages.yml");
+        messages = new MessageManager(this);
+        if (!reloadPlugin()) {
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
         ItemFrameCommand command = new ItemFrameCommand(this);
         PluginCommand itemFrame = Objects.requireNonNull(getCommand("itemframe"));
         itemFrame.setExecutor(command);
+        itemFrame.setTabCompleter(command);
 
         getServer().getConsoleSender().sendMessage(TextRenderer.render(
                 "<#B3E342>djinqItemFrames <#CACACA>made by <#B3E342>djinq "
                         + "<#CACACA>| <#B3E342>djinq.dev <#CACACA>| <#B3E342>Loaded"));
     }
 
-    private void reloadSettings() {
-        targetDistance = Math.clamp(getConfig().getInt("target-distance", 5), 1, 16);
-        messages = new MessageManager(this);
+    public boolean reloadPlugin() {
+        try {
+            reloadConfig();
+            int nextTargetDistance = Math.clamp(getConfig().getInt("target-distance", 5), 1, 16);
+            if (!messages.reload()) {
+                return false;
+            }
+
+            targetDistance = nextTargetDistance;
+            return true;
+        } catch (RuntimeException exception) {
+            getLogger().severe("Could not reload djinqItemFrames configuration: " + exception.getMessage());
+            return false;
+        }
     }
 
     public int targetDistance() {
@@ -34,11 +51,5 @@ public final class DjinqItemFrames extends JavaPlugin {
 
     public MessageManager messages() {
         return messages;
-    }
-
-    private void saveResourceIfAbsent(String resourceName) {
-        if (!getDataFolder().toPath().resolve(resourceName).toFile().isFile()) {
-            saveResource(resourceName, false);
-        }
     }
 }

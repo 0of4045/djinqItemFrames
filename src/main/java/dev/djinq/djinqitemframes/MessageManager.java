@@ -1,20 +1,44 @@
 package dev.djinq.djinqitemframes;
 
 import java.io.File;
+import java.io.IOException;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public final class MessageManager {
-    private final YamlConfiguration messages;
-    private final String prefix;
+    private final JavaPlugin plugin;
+    private YamlConfiguration messages;
+    private String prefix;
 
-    public MessageManager(DjinqItemFrames plugin) {
-        messages = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages.yml"));
-        prefix = messages.getString("prefix", "[Frames] ");
+    public MessageManager(JavaPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    public boolean reload() {
+        try {
+            YamlConfiguration nextMessages = new YamlConfiguration();
+            nextMessages.load(new File(plugin.getDataFolder(), "messages.yml"));
+            String nextPrefix = nextMessages.getString("prefix");
+            if (nextPrefix == null || nextMessages.getConfigurationSection("messages") == null) {
+                throw new InvalidConfigurationException("messages.yml is missing its prefix or messages section.");
+            }
+
+            messages = nextMessages;
+            prefix = nextPrefix;
+            return true;
+        } catch (IOException | InvalidConfigurationException exception) {
+            plugin.getLogger().severe("Could not load messages.yml: " + exception.getMessage());
+            return false;
+        }
     }
 
     public void send(CommandSender sender, String key) {
-        String message = messages.getString("messages." + key, "<#E34242>Missing message.");
-        sender.sendMessage(TextRenderer.render(prefix + message));
+        sender.sendMessage(TextRenderer.render(prefix + message(key)));
+    }
+
+    private String message(String key) {
+        return messages.getString("messages." + key, "<#E34242>Missing message.");
     }
 }
