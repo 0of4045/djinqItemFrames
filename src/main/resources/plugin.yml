@@ -1,5 +1,5 @@
 name: djinqItemFrames
-version: 1.0.1
+version: 1.0.2
 main: dev.djinq.djinqitemframes.DjinqItemFrames
 api-version: '1.21'
 description: Lightweight item frame toggle for Paper.
