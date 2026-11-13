@@ -1,5 +1,5 @@
 name: djinqItemFrames
-version: 1.0.2
+version: 2.0.0
 main: dev.djinq.djinqitemframes.DjinqItemFrames
 api-version: '1.21'
 description: Lightweight item frame toggle for Paper.
@@ -10,7 +10,6 @@ commands:
   itemframe:
     description: Toggles the item frame you are looking at.
     usage: /itemframe [reload]
-    permission: djinqitemframes.use
 
 permissions:
   djinqitemframes.use:

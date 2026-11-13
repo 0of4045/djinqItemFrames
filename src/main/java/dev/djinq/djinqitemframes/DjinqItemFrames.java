@@ -1,7 +1,12 @@
 package dev.djinq.djinqitemframes;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
+
 import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class DjinqItemFrames extends JavaPlugin {
@@ -10,7 +15,6 @@ public final class DjinqItemFrames extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
         ResourceMigration.mergeMissingDefaults(this, "config.yml");
         ResourceMigration.mergeMissingDefaults(this, "messages.yml");
         messages = new MessageManager(this);
@@ -31,15 +35,16 @@ public final class DjinqItemFrames extends JavaPlugin {
 
     public boolean reloadPlugin() {
         try {
-            reloadConfig();
-            int nextTargetDistance = Math.clamp(getConfig().getInt("target-distance", 5), 1, 16);
+            YamlConfiguration config = new YamlConfiguration();
+            config.load(new File(getDataFolder(), "config.yml"));
+            int nextTargetDistance = Math.clamp(config.getInt("target-distance", 5), 1, 16);
             if (!messages.reload()) {
                 return false;
             }
 
             targetDistance = nextTargetDistance;
             return true;
-        } catch (RuntimeException exception) {
+        } catch (IOException | InvalidConfigurationException | RuntimeException exception) {
             getLogger().severe("Could not reload djinqItemFrames configuration: " + exception.getMessage());
             return false;
         }

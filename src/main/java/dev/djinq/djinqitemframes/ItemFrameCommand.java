@@ -1,11 +1,13 @@
 package dev.djinq.djinqitemframes;
 
 import java.util.List;
+import java.util.Locale;
+
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.Location;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.util.RayTraceResult;
@@ -55,8 +57,11 @@ public final class ItemFrameCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return args.length == 1 && sender.hasPermission("djinqitemframes.reload")
-                && "reload".startsWith(args[0].toLowerCase()) ? List.of("reload") : List.of();
+        if (args.length == 1 && sender.hasPermission("djinqitemframes.reload")
+                && "reload".startsWith(args[0].toLowerCase(Locale.ROOT))) {
+            return List.of("reload");
+        }
+        return List.of();
     }
 
     private ItemFrame targetFrame(Player player) {
